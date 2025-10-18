@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PawTracker Pro - Smart Dog Collar Dashboard</title>
+  <meta name="description" content="Professional smart dog collar dashboard with real-time health monitoring, GPS tracking, and emergency alerts for your pet's safety and well-being.">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link href="https://cdn.jsdelivr.net/npm/lucide-static@0.276.0/font/lucide.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Royal Premium Theme - Light Mode */
+      --bg-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --bg-secondary: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+      --bg-card: rgba(255, 255, 255, 0.98);
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --header-bg: linear-gradient(135deg, #1e40af 0%, #3730a3 50%, #581c87 100%);
+      --accent-royal: #7c3aed;
+      --accent-gold: #f59e0b;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-amber: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --shadow: 0 8px 32px rgba(30, 41, 59, 0.12);
+      --shadow-hover: 0 20px 60px rgba(30, 41, 59, 0.25);
+      --border: rgba(226, 232, 240, 0.8);
+      --glass: rgba(255, 255, 255, 0.25);
+      --premium-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .dark {
+      /* Royal Premium Theme - Dark Mode */
+      --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --bg-secondary: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      --bg-card: rgba(30, 41, 59, 0.98);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --header-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #581c87 100%);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.5);
+      --border: rgba(71, 85, 105, 0.3);
+      --glass: rgba(30, 41, 59, 0.25);
+      --premium-gradient: linear-gradient(135deg, #4c1d95 0%, #581c87 100%);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    /* Premium Typography */
+    .title-font {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Header */
+    header {
+      background: var(--header-bg);
+      color: white;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 1.75rem;
+      font-weight: 800;
+      font-family: 'Playfair Display', serif;
+      letter-spacing: -0.025em;
+    }
+
+    .logo i {
+      font-size: 2.25rem;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: royal-float 4s ease-in-out infinite;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: #fbbf24;
+      transform: translateY(-2px);
+    }
+
+    .nav-links a:after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover:after {
+      width: 100%;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: royal-pulse 2s infinite;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+    }
+
+    .theme-toggle {
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.2);
+      color: white;
+      padding: 0.75rem;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 1.25rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .theme-toggle:hover {
+      background: rgba(251, 191, 36, 0.2);
+      border-color: #fbbf24;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+    }
+
+    /* Map */
+    #map {
+      height: 450px;
+      width: 100%;
+      border-radius: 0 0 24px 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    /* Dashboard */
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .dashboard-header {
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .dashboard-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: var(--premium-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.025em;
+    }
+
+    .dashboard-header p {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 24px;
+      padding: 2.5rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+    }
+
+    .card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--premium-gradient);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+      position: relative;
+    }
+
+    .card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      letter-spacing: -0.015em;
+    }
+
+    .card-value {
+      font-size: 2.75rem;
+      font-weight: 800;
+      margin: 1.5rem 0;
+      color: var(--text-primary);
+      font-feature-settings: 'tnum' 1;
+    }
+
+    .card-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+
+    /* Heart Rate Card */
+    .bpm-card {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+    }
+
+    .bpm-card .card-icon {
+      color: #dc2626;
+      animation: royal-heartbeat 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(220, 38, 38, 0.3));
+    }
+
+    .bpm-card.fast .card-icon { 
+      animation: royal-heartbeat 0.8s ease-in-out infinite;
+      color: #b91c1c;
+    }
+    
+    .bpm-card.slow .card-icon { 
+      animation: royal-heartbeat 3s ease-in-out infinite;
+      color: #ef4444;
+    }
+
+    .bpm-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(220, 38, 38, 0.15);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 1.5rem;
+      position: relative;
+    }
+
+    .bpm-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #dc2626 100%);
+      border-radius: 20px;
+      transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: royal-pulse-bar 2s ease-in-out infinite;
+      position: relative;
+    }
+
+    .bpm-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+
+    /* Activity Status Card */
+    .status-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.05) 100%);
+    }
+
+    .status-card .card-icon {
+      color: var(--accent-emerald);
+      filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.3));
+    }
+
+    .status-card .dog-animation {
+      font-size: 5rem;
+      margin: 1.5rem 0;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    }
+
+    /* Distinct Dog Animations */
+    .status-resting .dog-animation {
+      animation: dog-sleep 6s ease-in-out infinite;
+    }
+
+    .status-walking .dog-animation {
+      animation: dog-trot 2s ease-in-out infinite;
+    }
+
+    .status-running .dog-animation {
+      animation: dog-sprint 1s ease-in-out infinite;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 28px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    /* Light Mode Status Colors */
+    .status-resting { 
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.1));
+      color: #1d4ed8;
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+    
+    .status-walking { 
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+      color: #d97706;
+      border-color: rgba(245, 158, 11, 0.2);
+    }
+    
+    .status-running { 
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(252, 165, 165, 0.1));
+      color: #dc2626;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Dark Mode Status Colors */
+    .dark .status-resting { 
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(147, 197, 253, 0.15));
+      color: #93c5fd;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    
+    .dark .status-walking { 
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(251, 191, 36, 0.15));
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    
+    .dark .status-running { 
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(252, 165, 165, 0.15));
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Temperature Card */
+    .temp-card {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.05) 100%);
+    }
+
+    .temp-card .card-icon {
+      color: var(--accent-blue);
+      filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.3));
+    }
+
+    .thermometer {
+      width: 28px;
+      height: 120px;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 14px;
+      position: relative;
+      margin: 1.5rem auto;
+      overflow: hidden;
+      border: 2px solid rgba(59, 130, 246, 0.2);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .thermometer-fill {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      border-radius: 12px;
+      transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: mercury-rise 3s ease-out;
+    }
+
+    .thermometer-bulb {
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      animation: temp-glow 3s ease-in-out infinite;
+      box-shadow: 0 0 16px rgba(0,0,0,0.1);
+    }
+
+    .temp-cold .thermometer-fill, .temp-cold .thermometer-bulb { 
+      background: linear-gradient(to top, #3b82f6, #93c5fd); 
+    }
+    
+    .temp-normal .thermometer-fill, .temp-normal .thermometer-bulb { 
+      background: linear-gradient(to top, #10b981, #6ee7b7); 
+    }
+    
+    .temp-warm .thermometer-fill, .temp-warm .thermometer-bulb { 
+      background: linear-gradient(to top, #f59e0b, #fbbf24); 
+    }
+    
+    .temp-hot .thermometer-fill, .temp-hot .thermometer-bulb { 
+      background: linear-gradient(to top, #ef4444, #fca5a5); 
+    }
+
+   
+
+    /* SOS Card */
+    .sos-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.05) 100%);
+    }
+
+    .sos-card .card-icon {
+      color: var(--accent-emerald);
+      filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.3));
+    }
+
+    .sos-card.alert {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(252, 165, 165, 0.05) 100%);
+    }
+
+    .sos-card.alert .card-icon {
+      color: #dc2626;
+      animation: royal-sos-alert 1.2s ease-in-out infinite;
+      filter: drop-shadow(0 0 16px rgba(220, 38, 38, 0.5));
+    }
+
+    .sos-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 28px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .sos-safe {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.1));
+      color: #059669;
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .sos-alert {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(252, 165, 165, 0.1));
+      color: #dc2626;
+      border-color: rgba(239, 68, 68, 0.2);
+      animation: alert-pulse 2s ease-in-out infinite;
+    }
+
+    .dark .sos-safe {
+      color: #6ee7b7;
+    }
+
+    .dark .sos-alert {
+      color: #fca5a5;
+    }
+
+    /* Buzzer Card */
+    .buzzer-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+    }
+
+    .buzzer-card .card-icon {
+      color: var(--accent-purple);
+      filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.3));
+    }
+
+    .buzzer-card.active .card-icon {
+      animation: buzzer-vibrate 0.4s ease-in-out infinite;
+      color: #7c3aed;
+      filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.5));
+    }
+
+    .buzzer-card .sound-waves {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .buzzer-card.active .sound-waves {
+      opacity: 0.4;
+      animation: sound-ripple 1.5s ease-out infinite;
+    }
+
+    /* Premium Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 70px;
+      height: 38px;
+      margin-top: 1.5rem;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(139, 92, 246, 0.2);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 34px;
+      border: 2px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 30px; width: 30px;
+      left: 4px; bottom: 2px;
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    input:checked + .slider { 
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      border-color: #7c3aed;
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+    }
+
+    input:checked + .slider:before { 
+      transform: translateX(32px);
+      background: linear-gradient(135deg, #ffffff, #f8fafc);
+    }
+
+    /* Navigation Card */
+    .nav-card {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.05) 100%);
+    }
+
+    .nav-card .card-icon {
+      color: #6366f1;
+      animation: map-float 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.3));
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      padding: 16px 32px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+    }
+
+    .nav-btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 16px 40px rgba(99, 102, 241, 0.4);
+    }
+
+    .nav-btn:hover:before {
+      left: 100%;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--header-bg);
+      color: white;
+      margin-top: 5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 4rem 2rem 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 3rem;
+    }
+
+    .footer-section h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #fbbf24;
+    }
+
+    .footer-section p {
+      color: rgba(255,255,255,0.85);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+      font-size: 1.05rem;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 1.05rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .footer-links a:hover {
+      color: #fbbf24;
+      padding-left: 8px;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .social-links a {
+      width: 48px;
+      height: 48px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+      font-size: 1.2rem;
+    }
+
+    .social-links a:hover {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-color: #fbbf24;
+      transform: translateY(-4px) scale(1.1);
+      box-shadow: 0 12px 24px rgba(251, 191, 36, 0.3);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.15);
+      margin-top: 3rem;
+      padding-top: 2rem;
+      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .footer-bottom p {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Royal Premium Animations */
+    @keyframes royal-float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      33% { transform: translateY(-6px) rotate(2deg); }
+      66% { transform: translateY(-3px) rotate(-2deg); }
+    }
+
+    @keyframes royal-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.2); }
+    }
+
+    @keyframes royal-heartbeat {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.15); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.1); }
+      60% { transform: scale(1); }
+    }
+
+    /* Distinct Dog Activity Animations */
+    @keyframes dog-sleep {
+      0%, 100% { 
+        opacity: 1; 
+        transform: scale(1) rotate(0deg); 
+      }
+      25% { 
+        opacity: 0.8; 
+        transform: scale(0.95) rotate(-2deg); 
+      }
+      50% { 
+        opacity: 0.6; 
+        transform: scale(0.9) rotate(0deg); 
+      }
+      75% { 
+        opacity: 0.8; 
+        transform: scale(0.95) rotate(2deg); 
+      }
+    }
+
+    @keyframes dog-trot {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      25% { transform: translateY(-8px) translateX(2px); }
+      50% { transform: translateY(-4px) translateX(0); }
+      75% { transform: translateY(-8px) translateX(-2px); }
+    }
+
+    @keyframes dog-sprint {
+      0%, 100% { transform: translateX(0) rotate(0deg) scale(1); }
+      25% { transform: translateX(4px) rotate(3deg) scale(1.05); }
+      50% { transform: translateX(0) rotate(0deg) scale(1); }
+      75% { transform: translateX(-4px) rotate(-3deg) scale(1.05); }
+    }
+
+    @keyframes mercury-rise {
+      0% { height: 0%; opacity: 0.8; }
+      100% { height: var(--fill-height, 50%); opacity: 1; }
+    }
+
+    @keyframes temp-glow {
+      0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 16px rgba(0,0,0,0.1); }
+      50% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 24px rgba(0,0,0,0.2); }
+    }
+
+    @keyframes droplet-dance {
+      0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+      25% { transform: translateY(-5px) rotate(5deg) scale(1.05); }
+      50% { transform: translateY(-2px) rotate(0deg) scale(1); }
+      75% { transform: translateY(-5px) rotate(-5deg) scale(1.05); }
+    }
+
+    @keyframes wave-flow {
+      0%, 100% { transform: scaleX(1) skewX(0deg); }
+      50% { transform: scaleX(1.05) skewX(2deg); }
+    }
+
+    @keyframes royal-sos-alert {
+      0%, 100% { 
+        transform: scale(1); 
+        filter: drop-shadow(0 0 16px rgba(220, 38, 38, 0.5));
+      }
+      50% { 
+        transform: scale(1.15); 
+        filter: drop-shadow(0 0 32px rgba(220, 38, 38, 0.8));
+      }
+    }
+
+    @keyframes alert-pulse {
+      0%, 100% { 
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); 
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 32px rgba(239, 68, 68, 0.6); 
+        transform: scale(1.02);
+      }
+    }
+
+    @keyframes buzzer-vibrate {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(-4px) rotate(-2deg); }
+      75% { transform: translateX(4px) rotate(2deg); }
+    }
+
+    @keyframes sound-ripple {
+      0% { 
+        transform: translate(-50%, -50%) scale(0.5); 
+        opacity: 0.6; 
+      }
+      100% { 
+        transform: translate(-50%, -50%) scale(2.5); 
+        opacity: 0; 
+      }
+    }
+
+    @keyframes map-float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      33% { transform: translateY(-10px) scale(1.05); }
+      66% { transform: translateY(-5px) scale(1.02); }
+    }
+
+    @keyframes royal-pulse-bar {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header-content {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .dashboard {
+        padding: 2rem 1rem;
+      }
+
+      .dashboard-header h2 {
+        font-size: 2.5rem;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .card {
+        padding: 2rem;
+      }
+
+      .footer-content {
+        padding: 3rem 1rem 2rem;
+        text-align: center;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      #map {
+        height: 300px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo {
+        font-size: 1.5rem;
+      }
+
+      .dashboard-header h2 {
+        font-size: 2rem;
+      }
+
+      .card-value {
+        font-size: 2.25rem;
+      }
+
+      .card h3 {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="logo title-font">
+        <i class="fas fa-dog"></i>
+        <span>PawTracker Pro</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#tracking">Live Tracking</a>
+      </nav>
+      <div class="header-controls">
+        <div class="connection-status">
+          <div class="status-dot"></div>
+          <span>Connected</span>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Dashboard -->
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h2 class="title-font">Live Health Monitoring</h2>
+      <p>Real-time health and activity data from your pet's smart collar</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- BPM Card -->
+      <div class="card bpm-card" id="bpmCard">
+        <i class="card-icon fas fa-heartbeat"></i>
+        <h3 class="title-font">Heart Rate</h3>
+        <div class="card-value" id="bpm">--</div>
+        <div class="card-subtitle">BPM</div>
+        <div class="bpm-bar">
+          <div class="bpm-fill" id="bpmFill"></div>
+        </div>
+      </div>
+
+      <!-- Activity Status Card -->
+      <div class="card status-card" id="statusCard">
+        <i class="card-icon fas fa-running"></i>
+        <h3 class="title-font">Activity Status</h3>
+        <div class="dog-animation">🐕</div>
+        <div class="status-indicator status-resting" id="statusIndicator">
+          <div style="width: 10px; height: 10px; background: currentColor; border-radius: 50%; animation: royal-pulse 2s infinite;"></div>
+          <span id="status">--</span>
+        </div>
+      </div>
+
+      <!-- Temperature Card -->
+      <div class="card temp-card" id="tempCard">
+        <i class="card-icon fas fa-thermometer-half"></i>
+        <h3 class="title-font">Temperature</h3>
+        <div class="card-value" id="temp">--</div>
+        <div class="card-subtitle">°C Body Temp</div>
+        <div class="thermometer temp-normal">
+          <div class="thermometer-fill" id="thermometerFill"></div>
+          <div class="thermometer-bulb"></div>
+        </div>
+      </div>
+
+     
+
+      <!-- SOS Card -->
+      <div class="card sos-card" id="sosCard">
+        <i class="card-icon fas fa-shield-alt"></i>
+        <h3 class="title-font">Emergency Status</h3>
+        <div class="sos-badge sos-safe" id="sosBadge">
+          <div style="width: 10px; height: 10px; background: currentColor; border-radius: 50%;"></div>
+          <span>Safe</span>
+        </div>
+        <div class="card-subtitle">Last check: Just now</div>
+      </div>
+
+      <!-- Buzzer Control Card -->
+      <div class="card buzzer-card" id="buzzerCard">
+        <i class="card-icon fas fa-volume-up"></i>
+        <div class="sound-waves">
+          <i class="fas fa-circle" style="font-size: 3rem; animation: sound-ripple 1.5s ease-out infinite;"></i>
+        </div>
+        <h3 class="title-font">Find Pet</h3>
+        <div class="card-subtitle">Activate collar buzzer</div>
+        <label class="switch">
+          <input type="checkbox" id="buzzerToggle" onchange="handleBuzzerToggle(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Navigation Card -->
+      <div class="card nav-card">
+        <i class="card-icon fas fa-map-marker-alt"></i>
+        <h3 class="title-font">Navigation</h3>
+        <div class="card-subtitle">Get directions to your pet</div>
+        <button class="nav-btn" onclick="handleNavigate()">
+          <i class="fas fa-directions"></i> Open Maps
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4 class="title-font">
+          <i class="fas fa-dog"></i>
+          PawTracker Pro
+        </h4>
+        <p>Advanced smart collar technology for your pet's health, safety, and location tracking. Keep your furry family members safe with real-time monitoring and premium features.</p>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h4 class="title-font">Product</h4>
+        <ul class="footer-links">
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Mobile App</a></li>
+          <li><a href="#">API</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4 class="title-font">Support</h4>
+        <ul class="footer-links">
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>© 2025 PawTracker Pro. All rights reserved.</p>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span>Made with</span>
+        <i class="fas fa-heart" style="color: #fbbf24; animation: royal-pulse 2s infinite;"></i>
+        <span>for pets everywhere</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4NfTyH2d6ewNyJEgnTU6zwxS18_YvOmM",
+      authDomain: "dog-collar-c02a2.firebaseapp.com",
+      databaseURL: "https://dog-collar-c02a2-default-rtdb.firebaseio.com",
+      projectId: "dog-collar-c02a2",
+      storageBucket: "dog-collar-c02a2.firebasestorage.app",
+      messagingSenderId: "564102095078",
+      appId: "1:564102095078:web:39353ae4c81bf9a5d71b27"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Global variables
+    let map, marker;
+    let collarData = {};
+
+    // Initialize map
+    function initMap() {
+      map = L.map('map').setView([13.025676, 77.626183], 15);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      
+      marker = L.marker([13.025676, 77.626183]).addTo(map);
+    }
+
+    // Update animations based on data
+    function updateAnimations() {
+      const bpmCard = document.getElementById('bpmCard');
+      const statusCard = document.getElementById('statusCard');
+      const tempCard = document.getElementById('tempCard');
+      const sosCard = document.getElementById('sosCard');
+      
+      // BPM Animation
+      if (collarData.BPM) {
+        bpmCard.className = 'card bpm-card';
+        if (collarData.BPM > 100) bpmCard.className += ' fast';
+        else if (collarData.BPM < 80) bpmCard.className += ' slow';
+      }
+      
+      // Status Animation
+      if (collarData.Status) {
+        statusCard.className = `card status-card status-${collarData.Status.toLowerCase()}`;
+        
+        const statusIndicator = document.getElementById('statusIndicator');
+        statusIndicator.className = `status-indicator status-${collarData.Status.toLowerCase()}`;
+      }
+      
+      // Temperature Animation
+      if (collarData.Temp) {
+        const thermometer = tempCard.querySelector('.thermometer');
+        let tempClass = 'temp-normal';
+        
+        if (collarData.Temp < 37) tempClass = 'temp-cold';
+        else if (collarData.Temp <= 39) tempClass = 'temp-normal';
+        else if (collarData.Temp <= 40) tempClass = 'temp-warm';
+        else tempClass = 'temp-hot';
+        
+        thermometer.className = `thermometer ${tempClass}`;
+        
+        const fillHeight = Math.max(15, Math.min(100, ((collarData.Temp - 35) / 8) * 100));
+        const fill = document.getElementById('thermometerFill');
+        fill.style.setProperty('--fill-height', `${fillHeight}%`);
+        fill.style.height = `${fillHeight}%`;
+      }
+      
+      // SOS Animation
+      if (collarData.sos === 1) {
+        sosCard.className = 'card sos-card alert';
+      } else {
+        sosCard.className = 'card sos-card';
+      }
+    }
+
+    // Update UI with collar data
+    function updateUI() {
+      // BPM
+      const bpmEl = document.getElementById('bpm');
+      bpmEl.textContent = collarData.BPM || '--';
+      
+      const bpmFill = document.getElementById('bpmFill');
+      const bpmWidth = collarData.BPM ? Math.min((collarData.BPM / 120) * 100, 100) : 0;
+      bpmFill.style.width = `${bpmWidth}%`;
+      
+      // Status
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = collarData.Status || '--';
+      
+      // Temperature
+      const tempEl = document.getElementById('temp');
+      tempEl.textContent = collarData.Temp ? `${collarData.Temp.toFixed(1)}°C` : '--';
+      
+      
+      // SOS
+      const sosBadge = document.getElementById('sosBadge');
+      if (collarData.sos === 1) {
+        sosBadge.className = 'sos-badge sos-alert';
+        sosBadge.innerHTML = '<div style="width: 10px; height: 10px; background: currentColor; border-radius: 50%;"></div><span>ALERT!</span>';
+      } else {
+        sosBadge.className = 'sos-badge sos-safe';
+        sosBadge.innerHTML = '<div style="width: 10px; height: 10px; background: currentColor; border-radius: 50%;"></div><span>Safe</span>';
+      }
+      
+      // Update map
+      if (collarData.latitude && collarData.longitude && map && marker) {
+        marker.setLatLng([collarData.latitude, collarData.longitude]);
+        map.setView([collarData.latitude, collarData.longitude], 15);
+      }
+      
+      updateAnimations();
+    }
+
+    // Firebase listeners
+    function initFirebase() {
+      const collarRef = ref(db, 'collar');
+      const buzzerRef = ref(db, 'Buzzer/on');
+
+      onValue(collarRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          collarData = data;
+          updateUI();
+        }
+      });
+
+      onValue(buzzerRef, (snapshot) => {
+        const buzzerToggle = document.getElementById('buzzerToggle');
+        const buzzerCard = document.getElementById('buzzerCard');
+        const isOn = snapshot.val() === 1;
+        
+        buzzerToggle.checked = isOn;
+        
+        if (isOn) {
+          buzzerCard.classList.add('active');
+        } else {
+          buzzerCard.classList.remove('active');
+        }
+      });
+    }
+
+    // Buzzer toggle handler
+    window.handleBuzzerToggle = async function(checked) {
+      const buzzerRef = ref(db, 'Buzzer/on');
+      await set(buzzerRef, checked ? 1 : 0);
+      
+      const buzzerCard = document.getElementById('buzzerCard');
+      if (checked) {
+        buzzerCard.classList.add('active');
+      } else {
+        buzzerCard.classList.remove('active');
+      }
+    };
+
+    // Navigation handler
+    window.handleNavigate = function() {
+      if (collarData.latitude && collarData.longitude) {
+        window.open(`https://www.google.com/maps?q=${collarData.latitude},${collarData.longitude}`, "_blank");
+      } else {
+        alert('Pet location not available');
+      }
+    };
+
+    // Theme toggle
+    window.toggleTheme = function() {
+      const body = document.body;
+      const themeIcon = document.getElementById('theme-icon');
+      
+      body.classList.toggle('dark');
+      
+      if (body.classList.contains('dark')) {
+        themeIcon.className = 'fas fa-sun';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        themeIcon.className = 'fas fa-moon';
+        localStorage.setItem('theme', 'light');
+      }
+    };
+
+    // Initialize theme
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const body = document.body;
+      const themeIcon = document.getElementById('theme-icon');
+      
+      if (savedTheme === 'dark') {
+        body.classList.add('dark');
+        themeIcon.className = 'fas fa-sun';
+      }
+    }
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', function() {
+      initTheme();
+      initMap();
+      initFirebase();
+    });
+  </script>
+</body>
+</html>

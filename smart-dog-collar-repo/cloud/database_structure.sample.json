@@ -1,0 +1,13 @@
+{
+  "collar": {
+    "Temp": 38.6,
+    "BPM": 88,
+    "Status": "Walking",
+    "sos": 0,
+    "latitude": 13.025676,
+    "longitude": 77.626183
+  },
+  "Buzzer": {
+    "on": 0
+  }
+}
