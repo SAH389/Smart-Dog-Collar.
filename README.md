@@ -52,31 +52,38 @@ It enables **24/7 tracking**, **SOS alerts**, and **cloud-based dashboards** for
 
 ### 💻 Dashboard Interface
 ![Live Dashboard](images/dashboard.jpg)
+
 *Real-time vitals and remote control via web dashboard.*
 
 ### 🧠 System Architecture
-![System Architecture](images/system-architecture.jpg)
+![System Architecture](images/system_architecture.jpg)
+
 *End-to-end data flow from sensors to cloud to user interface.*
 
 ### ⚙️ Circuit Connection Diagram
 ![Circuit Diagram](images/circuit.jpg)
+
 *Complete wiring of ESP32, sensors, GSM/GPS, and battery module.*
 
 ### 🔧 Hardware Prototype
 ![Hardware Prototype 1](images/hardware1.jpg)
 ![Hardware Prototype 2](images/hardware2.jpg)
+
 *Working prototype built on perfboard with ESP32 and GSM/GPS integration.*
 
 ### 📊 Implementation Screens
 ![Implementation Overview](images/implementation.jpg)
+
 *Live vitals, remote control, and map view for real-time tracking.*
 
 ### 🚨 Alert Demo
 ![Alert Email Demo](images/alert-demo.jpg)
+
 *Email alert triggered by SOS button press.*
 
 ### 🗺️ Navigation Demo
 ![Navigation Demo](images/navigation-demo.jpg)
+
 *Google Maps link generation for live pet tracking.*
 
 ---
