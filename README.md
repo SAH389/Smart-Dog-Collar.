@@ -55,7 +55,7 @@ It enables **24/7 tracking**, **SOS alerts**, and **cloud-based dashboards** for
 *Real-time vitals and remote control via web dashboard.*
 
 ### 🧠 System Architecture
-![System Architecture](images/architecture.jpg)
+![System Architecture](images/system-architecture.jpg)
 *End-to-end data flow from sensors to cloud to user interface.*
 
 ### ⚙️ Circuit Connection Diagram
