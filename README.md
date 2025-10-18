@@ -49,23 +49,3 @@ It enables **24/7 tracking**, **SOS alerts**, and **cloud-based dashboards** for
 
 ## 🧩 Folder Structure
 
-# 🐾 Smart Dog Collar
-
-An IoT-based smart collar designed for real-time monitoring of a dog’s **health, activity, and location** using ESP32, GSM/GPS, and Firebase.  
-It enables **24/7 tracking**, **SOS alerts**, and **cloud-based dashboards** for complete pet safety and wellness.
-
----
-
-## 💡 Features
-- **Health Monitoring:** Tracks temperature, heart rate, and activity levels (resting, walking, running)  
-- **GPS Tracking:** Provides real-time location using GSM/GNSS  
-- **Cloud Connectivity:** Syncs data to Firebase in real time  
-- **Emergency Alerts:** Sends email notifications via Flask + SMTP when abnormal readings or SOS events occur  
-- **Web Dashboard:** Interactive interface with maps and live vitals  
-- **Remote Buzzer:** Enables owners to locate pets through a controlled buzzer  
-
----
-
-pip install flask firebase_admin python-dotenv
-python backend/email_service.py
-
