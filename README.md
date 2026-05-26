@@ -1,7 +1,8 @@
 # 🐾 Smart Dog Collar
-
-An IoT-based smart collar designed for real-time monitoring of a dog’s **health, activity, and location** using ESP32, GSM/GPS, and Firebase.  
+An IoT-based smart collar designed for real-time monitoring of a dog's **health, activity, and location** using ESP32, GSM/GPS, and Firebase.  
 It enables **24/7 tracking**, **SOS alerts**, and **cloud-based dashboards** for complete pet safety and wellness.
+
+🌐 **Live Dashboard:** [PawTracker Pro](https://wingerit-software.github.io/Dog-Collar/)
 
 ---
 
@@ -43,51 +44,78 @@ It enables **24/7 tracking**, **SOS alerts**, and **cloud-based dashboards** for
 - **Backend:** Firebase Realtime Database + Flask (Python)  
 - **Frontend:** HTML, CSS, JavaScript, Leaflet.js (map)  
 - **Cloud Services:** Firebase + PythonAnywhere  
+- **Hosting:** GitHub Pages  
 - **Email Notifications:** SMTP (Gmail App Password)  
 
 ---
+
+## 🧩 Folder Structure
+```
+SmartDogCollar/
+├── firmware/               # ESP32 Arduino code (C++)
+│   └── smart_collar.ino
+├── backend/                # Flask Python backend
+│   ├── app.py
+│   └── requirements.txt
+├── frontend/               # Web dashboard (HTML/CSS/JS)
+│   ├── index.html
+│   ├── style.css
+│   └── script.js
+├── images/                 # Screenshots & diagrams
+│   ├── dashboard.jpg
+│   ├── system_architecture.jpg
+│   ├── circuit.jpg
+│   ├── hardware1.jpg
+│   ├── hardware2.jpg
+│   ├── implementation.jpg
+│   ├── alert-demo.jpg
+│   └── navigation-demo.jpg
+└── README.md
+```
+
 ---
 
 ## 🖼️ Project Implementation & Visuals
 
 ### 💻 Dashboard Interface
-![Live Dashboard](images/dashboard.jpg)
-
+![Live Dashboard](images/dashboard.jpg)  
 *Real-time vitals and remote control via web dashboard.*
 
 ### 🧠 System Architecture
-![System Architecture](images/system_architecture.jpg)
-
+![System Architecture](images/system_architecture.jpg)  
 *End-to-end data flow from sensors to cloud to user interface.*
 
 ### ⚙️ Circuit Connection Diagram
-![Circuit Diagram](images/circuit.jpg)
-
+![Circuit Diagram](images/circuit.jpg)  
 *Complete wiring of ESP32, sensors, GSM/GPS, and battery module.*
 
 ### 🔧 Hardware Prototype
-![Hardware Prototype 1](images/hardware1.jpg)
-![Hardware Prototype 2](images/hardware2.jpg)
-
+![Hardware Prototype 1](images/hardware1.jpg)  
+![Hardware Prototype 2](images/hardware2.jpg)  
 *Working prototype built on perfboard with ESP32 and GSM/GPS integration.*
 
 ### 📊 Implementation Screens
-![Implementation Overview](images/implementation.jpg)
-
+![Implementation Overview](images/implementation.jpg)  
 *Live vitals, remote control, and map view for real-time tracking.*
 
 ### 🚨 Alert Demo
-![Alert Email Demo](images/alert-demo.jpg)
-
+![Alert Email Demo](images/alert-demo.jpg)  
 *Email alert triggered by SOS button press.*
 
 ### 🗺️ Navigation Demo
-![Navigation Demo](images/navigation-demo.jpg)
-
+![Navigation Demo](images/navigation-demo.jpg)  
 *Google Maps link generation for live pet tracking.*
 
 ---
 
+## 👩‍💻 Developer
 
-## 🧩 Folder Structure
+**Sahana A C**
+- 🎓 B.E. CSE @ HKBK College of Engineering, Bangalore
+- 🌐 [LinkedIn](https://www.linkedin.com/in/sahana-a-c-0b1a22281/)
+- 💻 [GitHub](https://github.com/SAH389)
+- 📧 acsahanagowda@gmail.com
 
+---
+
+<p align="center">Made with ❤️ for pets everywhere | Sahana A C</p>
